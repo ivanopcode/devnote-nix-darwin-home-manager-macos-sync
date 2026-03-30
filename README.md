@@ -69,11 +69,13 @@ what differs -- at minimum, `nixpkgs.hostPlatform`.
 Several requirements apply to current versions of nix-darwin and must be
 addressed before the first build.
 
-**Root activation.** System activation (`switch`, `activate`, `rollback`,
-`check`) runs as root. All `darwin-rebuild` invocations require `sudo`.
+**Root activation.** Activation actions (`switch`, `activate`, `rollback`,
+`check`) require `sudo`; non-activation actions such as `build` do not.
 
-**`system.primaryUser`.** nix-darwin requires an explicit declaration of the
-primary user account. Without it, certain activation scripts will fail.
+**`system.primaryUser`.** `system.primaryUser` is a transition mechanism for
+options that previously applied to the user running `darwin-rebuild`. In
+practice, it is a sensible default for new macOS configurations that rely on
+such options.
 
 **`nixpkgs.hostPlatform`.** Each host must declare its platform:
 `aarch64-darwin` for Apple Silicon, `x86_64-darwin` for Intel.
@@ -116,7 +118,7 @@ The flake defines inputs (pinned to stable release branches) and two
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nix-darwin, home-manager, ... }: {
+  outputs = inputs@{ self, nix-darwin, home-manager, nix-homebrew, ... }: {
     darwinConfigurations = {
 
       "macbook-pro" = nix-darwin.lib.darwinSystem {
